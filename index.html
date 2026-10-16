@@ -323,7 +323,7 @@ border-bottom:2px solid var(--border);
 <iframe id="preview"></iframe>
 
 <div class="status">
-STATUS: READY | GUST + FILES ENABLED
+STATUS: READY | GUST + HORIZEN + FILES ENABLED
 </div>
 
 </section>
@@ -331,6 +331,7 @@ STATUS: READY | GUST + FILES ENABLED
 <div style="display:flex;gap:10px;padding:8px;border-top:1px solid #22ff22;background:#000900;">
 <button onclick="downloadProject()">DOWNLOAD PROJECT</button>
 <button onclick="downloadGustOnly()">DOWNLOAD GUST</button>
+<button onclick="downloadHorizenOnly()">DOWNLOAD HORIZEN</button>
 </div>
 
 </div>
@@ -344,7 +345,7 @@ STATUS: READY | GUST + FILES ENABLED
 <div class="terminal-output" id="terminalOutput">
 <div>Compiler terminal ready.</div>
 <div>HTML file instances are available above the editor.</div>
-<div>Try: run gust | run files</div>
+<div>Try: run gust | run horizen | run files</div>
 </div>
 
 <div class="terminal-input-row">
@@ -689,6 +690,28 @@ terminalLine("FILES: " + filesUrl);
 terminalLine("295 games · 3wefiles.dpdns.org + cloak on 3we.dpdns.org.");
 }
 
+function runHorizenDirect(){
+const horizenUrl = new URL("HORIZEN.html", window.location.href).href;
+const w = window.open("about:blank", "_blank");
+
+if(!w){
+terminalLine("POPUP BLOCKED — ALLOW NEW TABS","error");
+return;
+}
+
+w.document.title = "Loading....";
+w.location.href = horizenUrl;
+terminalLine("HORIZEN: " + horizenUrl);
+}
+
+function downloadHorizenOnly(){
+const a = document.createElement("a");
+a.href = new URL("HORIZEN.html", window.location.href).href;
+a.download = "HORIZEN.html";
+a.click();
+terminalLine("HORIZEN DOWNLOAD STARTED");
+}
+
 function parseTerminalCmd(raw){
 return raw.trim().replace(/\s+/g, " ").toLowerCase();
 }
@@ -702,10 +725,12 @@ terminalLine("> " + cmd);
 
 if(parsed==="run gust"){
 runGustDirect();
+}else if(parsed==="run horizen"||parsed==="run horizon"){
+runHorizenDirect();
 }else if(parsed==="run files"){
 runFilesDirect();
 }else if(parsed==="help"){
-terminalLine("COMMANDS: help | clear | run gust | run files");
+terminalLine("COMMANDS: help | clear | run gust | run horizen | run files");
 }else if(parsed==="clear"){
 location.reload();
 }else{
