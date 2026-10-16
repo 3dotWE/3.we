@@ -691,7 +691,9 @@ terminalLine("FILES: " + filesUrl);
 terminalLine("295 games · 3wefiles.dpdns.org + cloak on 3we.dpdns.org.");
 }
 
-async function runBlankTabApp(label, file){
+/* The new tab fetches its own payload, so this page never holds megabytes of
+   app HTML. about:blank popups share this tab's renderer process. */
+function runBlankTabApp(label, file){
 const appUrl = new URL(file, window.location.href).href;
 const w = window.open("about:blank", "_blank");
 
@@ -700,25 +702,20 @@ terminalLine("POPUP BLOCKED — ALLOW NEW TABS","error");
 return;
 }
 
-w.document.title = "Loading....";
-terminalLine(label + " LOADING...");
-
-try{
-const res = await fetch(appUrl, {cache:"no-store"});
-
-if(!res.ok) throw new Error("HTTP " + res.status);
-
-const appHtml = patchGustTitle(await res.text());
+const boot = '<!DOCTYPE html><html><head><title>Loading....</title>'
++ '<script>(function(){var t="Loading....";document.title=t;'
++ 'setInterval(function(){if(document.title!==t)document.title=t},500);'
++ 'fetch(' + JSON.stringify(appUrl) + ',{cache:"no-store"})'
++ '.then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.text()})'
++ '.then(function(h){document.open();document.write(h);document.close();document.title=t})'
++ '.catch(function(e){document.body.textContent="LOAD FAILED: "+(e.message||e)});'
++ '})();<\/script></head><body style="margin:0;background:#000;color:#33ff33;'
++ 'font-family:\'Courier New\',monospace;padding:16px">Loading....</body></html>';
 
 w.document.open();
-w.document.write(appHtml);
+w.document.write(boot);
 w.document.close();
-w.document.title = "Loading....";
-terminalLine(label + " READY");
-}catch(err){
-terminalLine(label + " LOAD FAILED: " + (err.message || err),"error");
-w.close();
-}
+terminalLine(label + " LAUNCHED");
 }
 
 function downloadStandaloneApp(label, file){
