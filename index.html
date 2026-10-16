@@ -690,7 +690,7 @@ terminalLine("FILES: " + filesUrl);
 terminalLine("295 games · 3wefiles.dpdns.org + cloak on 3we.dpdns.org.");
 }
 
-function runHorizenDirect(){
+async function runHorizenDirect(){
 const horizenUrl = new URL("HORIZEN.html", window.location.href).href;
 const w = window.open("about:blank", "_blank");
 
@@ -700,8 +700,24 @@ return;
 }
 
 w.document.title = "Loading....";
-w.location.href = horizenUrl;
-terminalLine("HORIZEN: " + horizenUrl);
+terminalLine("HORIZEN LOADING...");
+
+try{
+const res = await fetch(horizenUrl, {cache:"no-store"});
+
+if(!res.ok) throw new Error("HTTP " + res.status);
+
+const horizenHtml = patchGustTitle(await res.text());
+
+w.document.open();
+w.document.write(horizenHtml);
+w.document.close();
+w.document.title = "Loading....";
+terminalLine("HORIZEN READY");
+}catch(err){
+terminalLine("HORIZEN LOAD FAILED: " + (err.message || err),"error");
+w.close();
+}
 }
 
 function downloadHorizenOnly(){
