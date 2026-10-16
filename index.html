@@ -323,7 +323,7 @@ border-bottom:2px solid var(--border);
 <iframe id="preview"></iframe>
 
 <div class="status">
-STATUS: READY | GUST + HORIZEN + FILES ENABLED
+STATUS: READY | GUST + HORIZEN + NAUTILUS + FILES ENABLED
 </div>
 
 </section>
@@ -332,6 +332,7 @@ STATUS: READY | GUST + HORIZEN + FILES ENABLED
 <button onclick="downloadProject()">DOWNLOAD PROJECT</button>
 <button onclick="downloadGustOnly()">DOWNLOAD GUST</button>
 <button onclick="downloadHorizenOnly()">DOWNLOAD HORIZEN</button>
+<button onclick="downloadNautilusOnly()">DOWNLOAD NAUTILUS</button>
 </div>
 
 </div>
@@ -345,7 +346,7 @@ STATUS: READY | GUST + HORIZEN + FILES ENABLED
 <div class="terminal-output" id="terminalOutput">
 <div>Compiler terminal ready.</div>
 <div>HTML file instances are available above the editor.</div>
-<div>Try: run gust | run horizen | run files</div>
+<div>Try: run gust | run horizen | run nautilus | run files</div>
 </div>
 
 <div class="terminal-input-row">
@@ -690,8 +691,8 @@ terminalLine("FILES: " + filesUrl);
 terminalLine("295 games · 3wefiles.dpdns.org + cloak on 3we.dpdns.org.");
 }
 
-async function runHorizenDirect(){
-const horizenUrl = new URL("HORIZEN.html", window.location.href).href;
+async function runBlankTabApp(label, file){
+const appUrl = new URL(file, window.location.href).href;
 const w = window.open("about:blank", "_blank");
 
 if(!w){
@@ -700,32 +701,48 @@ return;
 }
 
 w.document.title = "Loading....";
-terminalLine("HORIZEN LOADING...");
+terminalLine(label + " LOADING...");
 
 try{
-const res = await fetch(horizenUrl, {cache:"no-store"});
+const res = await fetch(appUrl, {cache:"no-store"});
 
 if(!res.ok) throw new Error("HTTP " + res.status);
 
-const horizenHtml = patchGustTitle(await res.text());
+const appHtml = patchGustTitle(await res.text());
 
 w.document.open();
-w.document.write(horizenHtml);
+w.document.write(appHtml);
 w.document.close();
 w.document.title = "Loading....";
-terminalLine("HORIZEN READY");
+terminalLine(label + " READY");
 }catch(err){
-terminalLine("HORIZEN LOAD FAILED: " + (err.message || err),"error");
+terminalLine(label + " LOAD FAILED: " + (err.message || err),"error");
 w.close();
 }
 }
 
-function downloadHorizenOnly(){
+function downloadStandaloneApp(label, file){
 const a = document.createElement("a");
-a.href = new URL("HORIZEN.html", window.location.href).href;
-a.download = "HORIZEN.html";
+a.href = new URL(file, window.location.href).href;
+a.download = file;
 a.click();
-terminalLine("HORIZEN DOWNLOAD STARTED");
+terminalLine(label + " DOWNLOAD STARTED");
+}
+
+function runHorizenDirect(){
+runBlankTabApp("HORIZEN", "HORIZEN.html");
+}
+
+function downloadHorizenOnly(){
+downloadStandaloneApp("HORIZEN", "HORIZEN.html");
+}
+
+function runNautilusDirect(){
+runBlankTabApp("NAUTILUS OS", "NAUTILUS.html");
+}
+
+function downloadNautilusOnly(){
+downloadStandaloneApp("NAUTILUS OS", "NAUTILUS.html");
 }
 
 function parseTerminalCmd(raw){
@@ -743,10 +760,12 @@ if(parsed==="run gust"){
 runGustDirect();
 }else if(parsed==="run horizen"||parsed==="run horizon"){
 runHorizenDirect();
+}else if(parsed==="run nautilus"||parsed==="run nautilus os"||parsed==="run nautilusos"){
+runNautilusDirect();
 }else if(parsed==="run files"){
 runFilesDirect();
 }else if(parsed==="help"){
-terminalLine("COMMANDS: help | clear | run gust | run horizen | run files");
+terminalLine("COMMANDS: help | clear | run gust | run horizen | run nautilus | run files");
 }else if(parsed==="clear"){
 location.reload();
 }else{
