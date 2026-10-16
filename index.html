@@ -691,30 +691,16 @@ terminalLine("FILES: " + filesUrl);
 terminalLine("295 games · 3wefiles.dpdns.org + cloak on 3we.dpdns.org.");
 }
 
-/* The new tab fetches its own payload, so this page never holds megabytes of
-   app HTML. about:blank popups share this tab's renderer process. */
-function runBlankTabApp(label, file){
-const appUrl = new URL(file, window.location.href).href;
-const w = window.open("about:blank", "_blank");
-
-if(!w){
-terminalLine("POPUP BLOCKED — ALLOW NEW TABS","error");
-return;
-}
-
-const boot = '<!DOCTYPE html><html><head><title>Loading....</title>'
-+ '<script>(function(){var t="Loading....";document.title=t;'
-+ 'setInterval(function(){if(document.title!==t)document.title=t},500);'
-+ 'fetch(' + JSON.stringify(appUrl) + ',{cache:"no-store"})'
-+ '.then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.text()})'
-+ '.then(function(h){document.open();document.write(h);document.close();document.title=t})'
-+ '.catch(function(e){document.body.textContent="LOAD FAILED: "+(e.message||e)});'
-+ '})();<\/script></head><body style="margin:0;background:#000;color:#33ff33;'
-+ 'font-family:\'Courier New\',monospace;padding:16px">Loading....</body></html>';
-
-w.document.open();
-w.document.write(boot);
-w.document.close();
+/* noopener gives the app its own renderer process, so a crash there (Horizen
+   running a heavy game) can't take this page down. The app masks its own URL.
+   An anchor click is used because window.open with noopener always returns
+   null, leaving no way to detect a blocked popup. */
+function runIsolatedApp(label, file){
+const a = document.createElement("a");
+a.href = new URL(file, window.location.href).href;
+a.target = "_blank";
+a.rel = "noopener noreferrer";
+a.click();
 terminalLine(label + " LAUNCHED");
 }
 
@@ -727,7 +713,7 @@ terminalLine(label + " DOWNLOAD STARTED");
 }
 
 function runHorizenDirect(){
-runBlankTabApp("HORIZEN", "HORIZEN.html");
+runIsolatedApp("HORIZEN", "HORIZEN.html");
 }
 
 function downloadHorizenOnly(){
@@ -735,7 +721,7 @@ downloadStandaloneApp("HORIZEN", "HORIZEN.html");
 }
 
 function runNautilusDirect(){
-runBlankTabApp("NAUTILUS OS", "NAUTILUS.html");
+runIsolatedApp("NAUTILUS OS", "NAUTILUS.html");
 }
 
 function downloadNautilusOnly(){
