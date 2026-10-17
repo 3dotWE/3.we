@@ -323,7 +323,7 @@ border-bottom:2px solid var(--border);
 <iframe id="preview"></iframe>
 
 <div class="status">
-STATUS: READY | GUST + HORIZEN + NAUTILUS + FILES ENABLED
+STATUS: READY | GUST + HORIZEN + NAUTILUS + FILES + CAUDNS ENABLED
 </div>
 
 </section>
@@ -346,7 +346,7 @@ STATUS: READY | GUST + HORIZEN + NAUTILUS + FILES ENABLED
 <div class="terminal-output" id="terminalOutput">
 <div>Compiler terminal ready.</div>
 <div>HTML file instances are available above the editor.</div>
-<div>Try: run gust | run horizen | run nautilus | run files</div>
+<div>Try: run gust | run horizen | run nautilus | run files | run caudns</div>
 </div>
 
 <div class="terminal-input-row">
@@ -691,6 +691,20 @@ terminalLine("FILES: " + filesUrl);
 terminalLine("295 games · 3wefiles.dpdns.org + cloak on 3we.dpdns.org.");
 }
 
+function runCaudnsDirect(){
+const caudnsUrl = new URL("caudns/index.html", window.location.href).href;
+const w = window.open("about:blank", "_blank");
+
+if(!w){
+terminalLine("POPUP BLOCKED — ALLOW NEW TABS","error");
+return;
+}
+
+w.document.title = "Loading....";
+w.location.href = caudnsUrl;
+terminalLine("CAUDNS: " + caudnsUrl);
+}
+
 /* noopener gives the app its own renderer process, so a crash there (Horizen
    running a heavy game) can't take this page down. The app masks its own URL.
    An anchor click is used because window.open with noopener always returns
@@ -747,8 +761,10 @@ runHorizenDirect();
 runNautilusDirect();
 }else if(parsed==="run files"){
 runFilesDirect();
+}else if(parsed==="run caudns"||parsed==="run cau dns"){
+runCaudnsDirect();
 }else if(parsed==="help"){
-terminalLine("COMMANDS: help | clear | run gust | run horizen | run nautilus | run files");
+terminalLine("COMMANDS: help | clear | run gust | run horizen | run nautilus | run files | run caudns");
 }else if(parsed==="clear"){
 location.reload();
 }else{
